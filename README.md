@@ -142,37 +142,6 @@ adjust palette, shape, order and filters, then download PNG / PDF / SVG. The
 **R code** tab prints the `ggplot2` call that produced what you are looking at,
 so an exploratory session ends with reproducible code.
 
-### Putting it on shinyapps.io
-
-`memeplotr` is not on CRAN, so `rsconnect` cannot resolve `library(memeplotr)`
-against a repository. Install the package *from GitHub* and it can: the
-install records `RemoteType: github` in the package's DESCRIPTION, and
-`rsconnect` passes that through so the server installs from the same repo.
-
-```r
-remotes::install_github("sanamparajuli/memeplotr")   # not install_local()
-packageDescription("memeplotr")$RemoteType      # must print "github"
-
-shiny::runApp("deploy")                          # check locally first
-rsconnect::setAccountInfo(name = "<account>", token = "<token>",
-                          secret = "<secret>")   # once, from shinyapps.io
-rsconnect::deployApp("deploy", appName = "memeplotr")
-```
-
-The URL is `https://<account>.shinyapps.io/memeplotr/`. The repository must be
-public, or the server needs a `GITHUB_PAT`. Push your changes and reinstall
-from GitHub before redeploying, or the server will install the older commit.
-
-If you would rather not depend on GitHub at deploy time,
-`bundle_shiny_app()` writes a directory that carries the package source
-with it and loads it at startup with `pkgload::load_all()`, so the server only
-installs CRAN packages:
-
-```r
-memeplotr::bundle_shiny_app("memeplotr-shinyapp")
-rsconnect::deployApp("memeplotr-shinyapp", appName = "memeplotr")
-```
-
 ## Data from other tools
 
 Any table of "motif *m* occurs in sequence *s* from *start* to *stop*" works:
