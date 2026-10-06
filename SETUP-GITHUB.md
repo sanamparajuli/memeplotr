@@ -2,19 +2,22 @@
 
 Everything below assumes you are in this directory.
 
-## 1. Replace the placeholder
+## 1. Maintainer details
 
-`YOURNAME` appears in `DESCRIPTION` (URL, BugReports) and `README.md` (install
-line, CI badge). Replace it, and put your own name and email in the
-`Authors@R` field of `DESCRIPTION` while you are there — the placeholder is
-the remaining `R CMD check` NOTE.
+The GitHub handle `sanamparajuli` is already substituted into `DESCRIPTION`
+(URL, BugReports) and `README.md` (install line, CI badge).
 
-```bash
-# macOS
-sed -i '' 's/YOURNAME/your-github-handle/g' DESCRIPTION README.md
-# Linux
-sed -i    's/YOURNAME/your-github-handle/g' DESCRIPTION README.md
+One placeholder is left — the maintainer in `Authors@R`, which is the
+remaining `R CMD check` NOTE. Edit `DESCRIPTION` line 6 to your real name and
+email:
+
+```r
+Authors@R: c(
+    person("Sanam", "Parajuli", email = "you@real.address", role = c("aut", "cre")))
 ```
+
+Add `comment = c(ORCID = "0000-0002-...")` if you have an ORCID; leave it out
+otherwise, since an invalid one raises its own NOTE.
 
 ## 2. Create the repo and push
 
@@ -26,7 +29,7 @@ Then:
 git add -A
 git commit -m "memeplotr 0.1.4"
 git branch -M main
-git remote add origin https://github.com/your-github-handle/memeplotr.git
+git remote add origin https://github.com/sanamparajuli/memeplotr.git
 git push -u origin main
 ```
 
@@ -40,7 +43,7 @@ deployment server cannot find; installing from GitHub records where it came
 from.
 
 ```r
-remotes::install_github("your-github-handle/memeplotr", build_vignettes = TRUE)
+remotes::install_github("sanamparajuli/memeplotr", build_vignettes = TRUE)
 packageDescription("memeplotr")$RemoteType   # must print "github"
 ```
 
@@ -71,7 +74,7 @@ previous version.
 git add -A && git commit -m "..." && git push
 ```
 ```r
-remotes::install_github("your-github-handle/memeplotr")
+remotes::install_github("sanamparajuli/memeplotr")
 rsconnect::deployApp("deploy", appName = "memeplotr")
 ```
 

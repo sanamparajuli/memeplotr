@@ -1,7 +1,7 @@
 # memeplotr
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/YOURNAME/memeplotr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/YOURNAME/memeplotr/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/sanamparajuli/memeplotr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sanamparajuli/memeplotr/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Publication-ready motif figures from MEME Suite output, built with ggplot2.
@@ -17,7 +17,7 @@ figure can be regenerated from a script.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("YOURNAME/memeplotr", build_vignettes = TRUE)
+remotes::install_github("sanamparajuli/memeplotr", build_vignettes = TRUE)
 ```
 
 Or from a local source tarball:
@@ -150,7 +150,7 @@ install records `RemoteType: github` in the package's DESCRIPTION, and
 `rsconnect` passes that through so the server installs from the same repo.
 
 ```r
-remotes::install_github("YOURNAME/memeplotr")   # not install_local()
+remotes::install_github("sanamparajuli/memeplotr")   # not install_local()
 packageDescription("memeplotr")$RemoteType      # must print "github"
 
 shiny::runApp("deploy")                          # check locally first
