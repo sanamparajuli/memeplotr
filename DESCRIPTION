@@ -3,7 +3,7 @@ Type: Package
 Title: Flexible 'ggplot2' Visualisation of 'MEME Suite' Motif Output
 Version: 0.1.4
 Authors@R: c(
-    person("First", "Last", email = "you@example.org", role = c("aut", "cre")))
+    person("Sanam", "Parajuli", email = "sanam.parajuli@sdstate.edu", role = c("aut", "cre")))
 Description: Reads 'MEME Suite' XML output (MEME, STREME, DREME) into tidy data
     frames and renders publication-quality motif composition diagrams, sequence
     logos, presence/absence heatmaps and co-occurrence plots with 'ggplot2'.
