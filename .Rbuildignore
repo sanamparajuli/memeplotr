@@ -1,0 +1,11 @@
+^data-raw$
+^.*\.Rproj$
+^\.Rproj\.user$
+^dev$
+^\.github$
+^\.git$
+^SETUP-GITHUB\.md$
+^memeplotr-shinyapp.*$
+^.*\.Rcheck$
+^memeplotr_check$
+^deploy$

@@ -1,0 +1,45 @@
+Package: memeplotr
+Type: Package
+Title: Flexible 'ggplot2' Visualisation of 'MEME Suite' Motif Output
+Version: 0.1.4
+Authors@R: c(
+    person("First", "Last", email = "you@example.org", role = c("aut", "cre")))
+Description: Reads 'MEME Suite' XML output (MEME, STREME, DREME) into tidy data
+    frames and renders publication-quality motif composition diagrams, sequence
+    logos, presence/absence heatmaps and co-occurrence plots with 'ggplot2'.
+    Motif maps can be aligned to a phylogeny supplied as a Newick file, with the
+    tree drawn in pure 'ggplot2' so that colours, block shapes, labels, scales
+    and themes remain fully user-modifiable. A 'shiny' application exposes the
+    same grammar interactively and emits the equivalent 'ggplot2' code for
+    reproducibility.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends:
+    R (>= 4.1)
+Imports:
+    ggplot2 (>= 3.4.0),
+    xml2,
+    dplyr (>= 1.1.0),
+    tibble,
+    rlang (>= 1.0.0),
+    ape,
+    patchwork,
+    grid,
+    stats,
+    utils
+Suggests:
+    shiny,
+    pkgload,
+    bslib,
+    DT,
+    colourpicker,
+    shinyjs,
+    svglite,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+URL: https://github.com/YOURNAME/memeplotr
+BugReports: https://github.com/YOURNAME/memeplotr/issues
+Config/roxygen2/version: 8.1.0

@@ -1,0 +1,252 @@
+---
+title: "Motif figures from MEME output with ggplot2"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    fig_width: 8
+    fig_height: 4.5
+vignette: >
+  %\VignetteIndexEntry{Motif figures from MEME output with ggplot2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", dpi = 110,
+                      fig.align = "center", warning = FALSE, message = FALSE)
+```
+
+```{r libs}
+library(memeplotr)
+library(ggplot2)
+```
+
+## The problem this package solves
+
+MEME Suite writes its own HTML and EPS: the motif block diagram and the
+sequence logos come out with fixed colours, fixed block shapes, no way to
+reorder the sequences, and no way to put the diagram next to a phylogeny.
+Once a reviewer asks for a colour-blind-safe palette, a clade-ordered figure,
+or a panel letter, the output has to be redrawn by hand.
+
+`memeplotr` reads the XML instead and hands back tidy data frames and ordinary
+`ggplot2` objects. Everything after that is the grammar you already know:
+`+ scale_fill_*()`, `+ theme_*()`, `+ labs()`, `patchwork`, `ggsave()`.
+
+## Reading a MEME run
+
+`read_meme()` takes `meme.xml`, `streme.xml` or `dreme.xml` and returns a
+`meme_result`: a list of tidy tables plus the position weight matrices.
+
+```{r read}
+xml <- system.file("extdata", "example_meme.xml", package = "memeplotr")
+res <- read_meme(xml)
+res
+```
+
+The pieces are plain data frames, so they work with `dplyr`, `tidyr` and
+everything else:
+
+```{r tables}
+head(res$motifs[, c("motif", "width", "nsites", "evalue", "consensus")])
+head(res$sites, 4)
+head(res$sequences, 4)
+```
+
+`summary()` gives one row per motif, and `as.data.frame()` flattens the sites
+table with the motif metadata joined on.
+
+```{r summary}
+summary(res)
+```
+
+Motif names from MEME (`MEME-1`, `MEME-2`, ...) are rarely what you want on a
+figure. `relabel_motifs()` renames them everywhere at once - across the motif
+table, the site tables and the PWM list:
+
+```{r relabel}
+res_lab <- relabel_motifs(res, c("R2R3-a", "R2R3-b", "SANT", "LHEQLE",
+                                 "C-term", "Gly-rich"))
+head(res_lab$motifs$motif)
+```
+
+## Motif composition diagrams
+
+`gg_motif_map()` is the block diagram. The default is an arrow pointing in the
+direction of the match:
+
+```{r map, fig.height = 4.2}
+gg_motif_map(res_lab, title = "MYB-like family: motif composition")
+```
+
+Block shape, palette, height and opacity are arguments; `motif_shapes()` lists
+the shapes and `memeplotr_palettes()` the built-in palettes.
+
+```{r shapes, fig.height = 4.2}
+gg_motif_map(res_lab, shape = "hexagon", palette = "bright", height = 0.75,
+             label = TRUE, label_size = 2.1, length_label = TRUE)
+```
+
+Sequences can be ordered by input order, name, length, motif count, an explicit
+vector, or a phylogeny. Sites can be filtered by motif, by sequence, and by
+p-value.
+
+```{r order, fig.height = 4.2}
+gg_motif_map(res_lab, order = "count", motifs = c("R2R3-a", "R2R3-b", "SANT"),
+             pvalue_max = 1e-8, title = "Three motifs, ordered by abundance")
+```
+
+Any single motif can be pinned to a colour while the rest come from the
+palette - useful when one motif is the point of the figure:
+
+```{r pin, fig.height = 4.2}
+gg_motif_map(res_lab, colours = c("LHEQLE" = "#D55E00"), palette = "grey")
+```
+
+## Aligning the diagram to a phylogeny
+
+This is the part MEME cannot do. `gg_tree_motifs()` draws a Newick tree in pure
+`ggplot2` and puts the motif map beside it on exactly the same rows.
+
+```{r tree, fig.height = 4.6}
+nwk <- system.file("extdata", "example_tree.nwk", package = "memeplotr")
+gg_tree_motifs(res_lab, nwk, align_tips = TRUE, widths = c(1, 2.6),
+               title = "Motif composition on the species tree")
+```
+
+Tips that are in the tree but have no motif hits keep their row, so nothing
+silently shifts out of register. The tree panel is an ordinary plot too:
+
+```{r tree2, fig.height = 4.2, fig.width = 5}
+gg_phylo(nwk, cladogram = TRUE, tip_points = TRUE, node_labels = TRUE,
+         title = "Cladogram")
+```
+
+To align a plot of your own, ask for the tip order and build your plot on it,
+then compose with `gg_tree_panel()`:
+
+```{r tiporder}
+tree_tip_order(nwk)
+```
+
+## Sequence logos
+
+Logos are built from the PWMs as polygons - no font or graphics-device
+dependency, so the letters respond to `fill`, `colour`, `alpha` and themes like
+any other layer.
+
+```{r logo, fig.height = 2.6}
+gg_motif_logo(res_lab, "R2R3-a", show_consensus = TRUE)
+```
+
+The stack height is information content by default, or probability; the letter
+colouring follows amino-acid chemistry, hydropathy, the Taylor scheme, a
+nucleotide scheme, or a flat colour, and individual letters can be overridden.
+
+```{r logo2, fig.height = 2.6}
+gg_motif_logo(res_lab, "R2R3-a", method = "probability",
+              scheme = "hydrophobicity", outline = "grey25")
+```
+
+```{r logos, fig.height = 5.4}
+gg_motif_logos(res_lab, motifs = c("R2R3-a", "R2R3-b", "SANT"), ncol = 1)
+```
+
+For DNA motifs, `reverse_complement = TRUE` flips the matrix.
+
+## Summary and comparative views
+
+For families too large to read as a block diagram, or when the question is
+presence/absence rather than position:
+
+```{r heat, fig.height = 4.2}
+gg_motif_heatmap(res_lab, order = "tree", tree = nwk, keep_empty = TRUE,
+                 value = "count", label = TRUE)
+```
+
+```{r counts, fig.height = 4.2}
+gg_motif_counts(res_lab, order = "count")
+```
+
+```{r cooc, fig.height = 4}
+gg_motif_cooccurrence(res_lab, measure = "jaccard", label = TRUE)
+```
+
+```{r pos, fig.height = 3.6}
+gg_motif_positions(res_lab, scale = "relative")
+```
+
+Because the heatmap and the count bars use the same vertical convention as the
+motif map, they can be composed against the tree as well:
+
+```{r trio, fig.height = 4.6, fig.width = 9}
+library(patchwork)
+gg_tree_panel(
+  gg_phylo(nwk, tip_labels = FALSE, align_tips = TRUE),
+  list(gg_motif_heatmap(res_lab, order = "tree", tree = nwk, keep_empty = TRUE),
+       gg_motif_counts(res_lab, order = "tree", tree = nwk, keep_empty = TRUE,
+                       y_labels = FALSE)),
+  widths = c(0.7, 1.4, 1))
+```
+
+## Output from other tools
+
+Anything that reports "this motif is at these coordinates in this sequence"
+can be plotted with the same functions. `read_fimo()` reads FIMO's TSV, and
+`as_motif_table()` adapts an arbitrary data frame by naming its columns:
+
+```{r fimo, fig.height = 3.4}
+fimo <- read_fimo(system.file("extdata", "example_fimo.tsv",
+                              package = "memeplotr"))
+head(fimo, 3)
+
+hits <- data.frame(
+  gene  = c("g1", "g1", "g2", "g2", "g3"),
+  dom   = c("PF00249", "PF00249", "PF00249", "SANT", "PF00249"),
+  from  = c(12, 68, 15, 120, 9),
+  to    = c(58, 115, 61, 168, 55),
+  len   = c(240, 240, 260, 260, 190))
+tbl <- as_motif_table(hits, sequence = "gene", motif = "dom",
+                      start = "from", stop = "to", seq_length = "len")
+gg_motif_map(tbl, shape = "capsule", label = TRUE)
+```
+
+## It is still a ggplot
+
+Nothing is locked down. Replace the scale, change the theme, add layers,
+facet, annotate:
+
+```{r custom, fig.height = 4.2}
+gg_motif_map(res_lab, backbone_colour = "grey80") +
+  scale_fill_viridis_d(option = "plasma", end = 0.9) +
+  labs(title = "Custom scale and theme", x = "Residue") +
+  theme_minimal(base_size = 11) +
+  theme(panel.grid.major.y = element_blank(),
+        legend.position = "bottom")
+```
+
+`geom_motif()` is available if you would rather build the plot from scratch:
+
+```{r geom, fig.height = 3}
+ggplot(res$sites, aes(xmin = start, xmax = stop, y = sequence, fill = motif)) +
+  geom_motif(shape = "notch", height = 0.5) +
+  scale_fill_motif(palette = "earth") +
+  theme_motif()
+```
+
+## The Shiny app
+
+`run_memeplotr()` opens an interactive front end: upload `meme.xml` and a
+Newick file, click the figure into shape, download it as PNG, PDF or SVG - and
+copy the generated `ggplot2` call from the "R code" tab so the figure can be
+regenerated in a script later.
+
+```{r app, eval = FALSE}
+run_memeplotr()
+```
+
+## Session information
+
+```{r session}
+sessionInfo()
+```
