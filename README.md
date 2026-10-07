@@ -13,6 +13,8 @@ instead and returns tidy data frames and ordinary `ggplot2` objects, so colour,
 shape, order, labelling and composition are all under your control - and the
 figure can be regenerated from a script.
 
+Shiny app: https://sanamparajuli.shinyapps.io/memeplotr/
+
 ## Install
 
 ```r
